@@ -1,0 +1,24 @@
+name: Ubuntu VNC Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install and Run VNC Server
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xfce4 xfce4-goodies tightvncserver
+        echo "startxfce4 &" > ~/.vnc/xstartup
+        sudo chmod +x ~/.vnc/xstartup
+        vncserver -geometry 1280x800 -depth 24
+        echo "VNC server started"
+
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
