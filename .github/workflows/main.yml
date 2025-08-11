@@ -1,4 +1,4 @@
-name: Ubuntu VNC Server
+name: Ubuntu VNC Desktop
 
 on:
   workflow_dispatch:
@@ -11,14 +11,26 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Install and Run VNC Server
+    - name: Set up VNC environment
       run: |
+        # Install the desktop environment and VNC server
         sudo apt-get update
-        sudo apt-get install -y xfce4 xfce4-goodies tightvncserver
-        echo "startxfce4 &" > ~/.vnc/xstartup
-        sudo chmod +x ~/.vnc/xstartup
-        vncserver -geometry 1280x800 -depth 24
-        echo "VNC server started"
+        sudo apt-get install -y xfce4 xfce4-goodies dbus-x11 tigervnc-standalone-server
 
-    - name: Setup tmate session
+        # Create the .vnc directory and set the password using the secret
+        mkdir -p ~/.vnc
+        echo "${{ secrets.VNC_PASSWORD }}" | vncpasswd -f > ~/.vnc/passwd
+        sudo chmod 600 ~/.vnc/passwd
+
+        # Create the startup file
+        echo "#!/bin/bash" > ~/.vnc/xstartup
+        echo "unset SESSION_MANAGER" >> ~/.vnc/xstartup
+        echo "unset DBUS_SESSION_BUS_ADDRESS" >> ~/.vnc/xstartup
+        echo "startxfce4 &" >> ~/.vnc/xstartup
+        sudo chmod +x ~/.vnc/xstartup
+
+        # Start the VNC server on display :1
+        vncserver :1 -geometry 1366x768 -depth 24
+
+    - name: Setup tmate session for SSH tunneling
       uses: mxschmitt/action-tmate@v3
