@@ -1,36 +1,20 @@
-name: Ubuntu VNC Desktop
-
+name: Windows – Litemanager
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Start Building…
+    runs-on: windows-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Downloading & installing Essentials
+        run: |
+          Invoke-WebRequest -Uri "https://gitlab.com/chamod12/lm_win-10_github_rdp/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
+          cmd /c Downloads.bat
 
-    - name: Set up VNC environment
-      run: |
-        # Install the desktop environment and VNC server
-        sudo apt-get update
-        sudo apt-get install -y xfce4 xfce4-goodies dbus-x11 tigervnc-standalone-server
+      - name: Connect to LiteManager
+        run: cmd /c show.bat
 
-        # Create the .vnc directory and set the password using the secret
-        mkdir -p ~/.vnc
-        echo "${{ secrets.VNC_PASSWORD }}" | vncpasswd -f > ~/.vnc/passwd
-        sudo chmod 600 ~/.vnc/passwd
-
-        # Create the startup file
-        echo "#!/bin/bash" > ~/.vnc/xstartup
-        echo "unset SESSION_MANAGER" >> ~/.vnc/xstartup
-        echo "unset DBUS_SESSION_BUS_ADDRESS" >> ~/.vnc/xstartup
-        echo "startxfce4 &" >> ~/.vnc/xstartup
-        sudo chmod +x ~/.vnc/xstartup
-
-        # Start the VNC server on display :1
-        vncserver :1 -geometry 1366x768 -depth 24
-
-    - name: Setup tmate session for SSH tunneling
-      uses: mxschmitt/action-tmate@v3
+      - name: Time Counter
+        run: cmd /c loop.bat
